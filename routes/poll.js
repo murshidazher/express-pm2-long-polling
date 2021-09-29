@@ -3,14 +3,14 @@ const router = express.Router();
 const config = require('./config');
 
 // Can use routers as well
-const longpoll = require("express-longpoll")(router);
+// const longpoll = require("express-longpoll")(router);
 
-longpoll.create("/routerpoll");
+// longpoll.create("/routerpoll");
 
 router.get("/", (req, res) => {
-  longpoll.publish("/routerpoll", {
-      text: "Some data"
-  });
+  // longpoll.publish("/routerpoll", {
+  //     text: "Some data"
+  // });
   res.send({
     message: `v${config.api.VERSION} : worker ID - ${process.pid}`,
     status: 'up'
