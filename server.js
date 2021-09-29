@@ -3,6 +3,10 @@ const cors = require('cors');
 const fabObj = require("./math-logic/fibonacci-series");
 const app = express();
 
+process
+  .on('SIGTERM', shutdown('SIGTERM'))
+  .on('SIGINT', shutdown('SIGINT'))
+  .on('uncaughtException', shutdown('uncaughtException'));
 
 app.use(cors({
   origin: '*'
@@ -30,3 +34,14 @@ app.listen(8090, function () {
 //      process.exit(err ? 1 : 0)
 //    })
 // })
+
+function shutdown(signal) {
+  return (err) => {
+    console.log(`${ signal }...`);
+    if (err) console.error(err.stack || err);
+    setTimeout(() => {
+      console.log('...waited 5s, exiting.');
+      process.exit(err ? 1 : 0);
+    }, 5000).unref();
+  };
+}
