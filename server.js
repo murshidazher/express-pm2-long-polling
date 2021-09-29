@@ -14,6 +14,6 @@ app.use((req, res, next) => {
 
 app.use("/", require("./routes/poll.js"));
 
-app.listen(8080, function() {
-    console.log("Listening on port 8080");
+app.listen(8090, function() {
+    console.log("Listening on port 8090");
 });
