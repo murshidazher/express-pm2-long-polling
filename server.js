@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const fabObj = require("./math-logic/fibonacci-series");
 const app = express();
 
 
@@ -14,7 +15,9 @@ app.use((req, res, next) => {
 
 app.use("/", require("./routes/poll.js"));
 
-app.listen(8090, function() {
+app.listen(8090, function () {
+  // simulate time to connect to other services
+  let number = fabObj.calculateFibonacciValue(Number.parseInt(40));
   console.log("Listening on port 8090");
   // Here we send the ready signal to PM2
   process.send('ready');
