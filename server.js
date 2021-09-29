@@ -1,12 +1,15 @@
 const express = require('express');
 const cors = require('cors');
-const fabObj = require("./math-logic/fibonacci-series");
 const app = express();
 
-process
-  .on('SIGTERM', shutdown('SIGTERM'))
-  .on('SIGINT', shutdown('SIGINT'))
-  .on('uncaughtException', shutdown('uncaughtException'));
+let isDisableKeepAlive = false;
+
+app.use((req, res, next) => {
+  if (isDisableKeepAlive) {
+    res.set("Connection", "close");
+  }
+  next();
+});
 
 app.use(cors({
   origin: '*'
@@ -19,9 +22,11 @@ app.use((req, res, next) => {
 
 app.use("/", require("./routes/poll.js"));
 
+app.get("/api", (req, res) => {
+  res.send(`I'm work! ${uuid}`);
+});
+
 app.listen(8090, function () {
-  // simulate time to connect to other services
-  // let number = fabObj.calculateFibonacciValue(Number.parseInt(50));
   console.log("Listening on port 8090");
 
   // Here we send the ready signal to PM2
@@ -35,13 +40,10 @@ app.listen(8090, function () {
 //    })
 // })
 
-function shutdown(signal) {
-  return (err) => {
-    console.log(`${ signal }...`);
-    if (err) console.error(err.stack || err);
-    setTimeout(() => {
-      console.log('...waited 5s, exiting.');
-      process.exit(err ? 1 : 0);
-    }, 5000).unref();
-  };
-}
+process.on("SIGINT", () => {
+  isDisableKeepAlive = true;
+  server.close(() => {
+    console.log(`server closed`);
+    process.exit(0);
+  });
+});
