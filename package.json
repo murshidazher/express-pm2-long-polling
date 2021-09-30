@@ -1,26 +1,59 @@
 {
-  "name": "example-1",
+  "name": "express-pm2-long-polling",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "start:pm2": "pm2 start ecosystem.config.js",
-    "reload": "pm2 reload ecosystem.config.js",
-    "log": "pm2 log express-pm2-long-polling"
-  },
+  "private": false,
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/murshidazher/express-pm2-long-polling.git"
+  },
   "license": "ISC",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "pm2 start pm2.config.js",
+    "start:dev": "nodemon src/server.js",
+    "reload": "pm2 reload pm2.config.js",
+    "log": "pm2 log express-pm2-long-polling",
+    "monit": "pm2 monit express-pm2-long-polling",
+    "stop": "pm2 stop pm2.config.js",
+    "build": "babel ./src --out-dir ./build",
+    "lint": "yarn lint:eslint && yarn lint:prettier",
+    "lint:eslint": "eslint \"**/*.*\"",
+    "lint:prettier": "prettier --check \"**/*.*\"",
+    "lint:fix": "eslint . --fix",
+    "fix": "yarn fix:eslint && yarn fix:prettier",
+    "fix:eslint": "eslint --fix \"**/*.*\"",
+    "fix:prettier": "prettier --write \"**/*.*\"",
+    "debug": "node --inspect-brk src/server.js",
+    "ping": "./script/test-ping.sh"
+  },
   "dependencies": {
-    "@godaddy/terminus": "~4.9.0",
-    "chalk": "~3.0.0",
+    "bunyan": "~1.8.15",
     "cors": "~2.8.5",
     "death": "~1.1.0",
     "delay": "~5.0.0",
     "express": "^4.14.1",
-    "express-longpoll": "~0.0.6",
+    "express-request-id": "~1.4.1",
+    "http-errors": "~1.7.2",
     "lightship": "~6.7.2",
     "nanoid": "~3.1.28",
-    "uuid": "~8.3.2"
+    "on-finished": "~2.3.0",
+    "why-is-node-running": "~2.2.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "~7.15.7",
+    "@babel/core": "~7.15.5",
+    "@babel/node": "~7.15.4",
+    "@babel/preset-env": "~7.15.6",
+    "@babel/runtime": "~7.15.4",
+    "eslint": "~7.32.0",
+    "eslint-config-airbnb-base": "~14.2.1",
+    "eslint-config-prettier": "~8.3.0",
+    "eslint-import-resolver-babel-module": "~5.3.1",
+    "eslint-plugin-import": "~2.24.2",
+    "eslint-plugin-prettier": "~4.0.0",
+    "nodemon": "~2.0.13",
+    "prettier": "~2.4.1"
   }
 }
