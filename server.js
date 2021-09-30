@@ -1,22 +1,12 @@
 const express = require('express');
 const cors = require('cors');
-const appReady = require('app-ready');
-const handleQuit = require('handle-quit');
+const appReady = require('./app-ready');
+const handleQuit = require('./handle-quit');
 const app = express();
-
-let isDisableKeepAlive = false;
 
 app.use(cors({
   origin: '*'
 }));
-
-app.use((req, res, next) => {
-  if (isDisableKeepAlive) {
-    console.log("NO NEW CONNECTION " + process.pid);
-    res.set("Connection", "close");
-  }
-  next();
-});
 
 app.use((req, res, next) => {
     console.log("URL: " + req.url);
@@ -49,12 +39,5 @@ handleQuit(() => {
 //      process.exit(err ? 1 : 0)
 //    })
 // })
-
-// process.on("SIGINT", () => {
-//   isDisableKeepAlive = true;
-//   handleQuit(() => {
-//     server.close();
-//   });
-// });
 
 

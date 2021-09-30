@@ -1,6 +1,6 @@
 const config = {
   api: {
-    VERSION: "1.0.17"
+    VERSION: "1.1.18"
   }
 }
 
