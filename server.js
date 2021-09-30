@@ -10,13 +10,13 @@ app.use(cors({
   origin: '*'
 }));
 
-// app.use((req, res, next) => {
-//   if (isDisableKeepAlive) {
-//     console.log("NO NEW CONNECTION: " + req.url);
-//     res.set("Connection", "close");
-//   }
-//   next();
-// });
+app.use((req, res, next) => {
+  if (isDisableKeepAlive) {
+    console.log("NO NEW CONNECTION " + process.pid);
+    res.set("Connection", "close");
+  }
+  next();
+});
 
 app.use((req, res, next) => {
     console.log("URL: " + req.url);
@@ -39,7 +39,7 @@ await app.listen(8090, function () {
 appReady();
 
 handleQuit(() => {
-  // isDisableKeepAlive = true;
+  isDisableKeepAlive = true;
   server.close();
 });
 
