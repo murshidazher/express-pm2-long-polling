@@ -9,9 +9,9 @@ module.exports = {
       exp_backoff_restart_delay: 1000,
       shutdown_with_message: true,
       kill_timeout: 60000,
-      instance_var: 'APP_INSTANCE_SEQ',
       listen_timeout: 10000,
-      max_memory_restart: '1G',
+      instance_var: 'APP_INSTANCE_SEQ',
+      max_memory_restart: '2G',
       cwd: '/home/ubuntu/express-pm2-long-polling/src',
       env: {
         NODE_ENV: 'prod',

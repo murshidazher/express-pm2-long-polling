@@ -8,6 +8,8 @@ ssh ubuntu@10.118.10.25 <<EOF
     npm install
     npm install -g pm2
 
-    pm2 startOrGracefulReload pm2.config.js
+    pm2 reload pm2.config.js
+    # pm2 startOrGracefulReload pm2.config.js
+
     exit
 EOF
