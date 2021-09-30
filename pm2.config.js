@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'express-pm2-long-polling',
       script: 'server.js',
-      instances: 'max',
+      instances: '2',
       wait_ready: true,
       exec_mode: 'cluster',
       exp_backoff_restart_delay: 1000,
