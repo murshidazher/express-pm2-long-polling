@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
   });
 });
 
-const server = app.listen(8080);
+const server = app.listen(8090);
 
 const lightship = createLightship();
 
