@@ -1,6 +1,7 @@
 'use strict';
 
 const { bold } = require('chalk');
+const ON_DEATH = require('death')({ SIGHUP: true, uncaughtException: true })
 
 let installed = false;
 module.exports = (shutdown) => {
@@ -9,14 +10,11 @@ module.exports = (shutdown) => {
     }
 
     installed = true;
-
     let hurry = false;
 
     const onSignal = (signal) => {
         if (hurry) {
-            console.error(bold.red('\nShutting down immediately. You monster!'));
-            // Quit and tell the shell something went wrong.
-            // eslint-disable-next-line unicorn/no-process-exit
+            console.error(bold.red('\nShutting down immediately.'));
             process.exit(128 + (signal === 'SIGINT' ? 2 : 15));
         }
 
