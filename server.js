@@ -1,43 +1,65 @@
 const express = require('express');
 const cors = require('cors');
-const appReady = require('./app-ready');
-const handleQuit = require('./handle-quit');
+const config = require('./routes/config');
+const { nanoid } = require('nanoid');
+const delay = require('delay');
+const { createLightship} = require('lightship');
+
 const app = express();
+
+const minute = 60 * 1000;
+
+let total = 0;
+let runningTotal = 0;
 
 app.use(cors({
   origin: '*'
 }));
 
 app.use((req, res, next) => {
-    console.log("URL: " + req.url);
+    console.log(`v${config.api.VERSION} ${nanoid()} running total: ${total}, number served: ${total}, worker id: ${process.pid}`);
     next();
 });
 
-app.use("/", require("./routes/poll.js"));
+app.get('/', (req, res) => {
+  total++;
+  runningTotal++;
 
-app.get("/api", (req, res) => {
-  res.send(`I'm work! ${uuid}`);
+  if (total === 1000) {
+    lightship.shutdown();
+  }
+
+  setTimeout(() => {
+    runningTotal--;
+
+    if (runningTotal < 100) {
+      lightship.signalReady();
+    } else {
+      lightship.signalNotReady();
+    }
+  }, minute);
+
+  res.send({
+    uuid: `${nanoid()}`,
+    message: `v${config.api.VERSION} : worker ID - ${process.pid}`,
+    status: 'up'
+  });
 });
 
-await app.listen(8090, function () {
-  console.log("Listening on port 8090");
+const server = app.listen(8080);
 
-  // Here we send the ready signal to PM2
-  // process.send('ready');
-});
+const lightship = createLightship();
 
-appReady();
 
-handleQuit(() => {
-  isDisableKeepAlive = true;
+lightship.registerShutdownHandler(async () => {
+  // Allow sufficient amount of time to allow all of the existing
+  // HTTP requests to finish before terminating the service.
+  await delay(minute);
+
   server.close();
 });
 
-// process.on('SIGINT', function () {
-//   // clear everything needed (like database connections, processing jobs…) before letting your application exit for a graceful shutdown
-//    db.stop(function(err) {
-//      process.exit(err ? 1 : 0)
-//    })
-// })
-
+// Lightship default state is "SERVER_IS_NOT_READY". Therefore, you must signal
+// that the server is now ready to accept connections.
+lightship.signalReady();
 
