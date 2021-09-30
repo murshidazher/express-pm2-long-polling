@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'express-pm2-long-polling',
-      script: 'src/server.js',
+      script: 'server.js',
       instances: 'max',
       wait_ready: true,
       exec_mode: 'cluster',
@@ -12,6 +12,7 @@ module.exports = {
       instance_var: 'APP_INSTANCE_SEQ',
       listen_timeout: 10000,
       max_memory_restart: '1G',
+      cwd: '/home/ubuntu/express-pm2-long-polling/src',
       env: {
         NODE_ENV: 'prod',
       },
