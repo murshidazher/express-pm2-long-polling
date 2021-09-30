@@ -12,9 +12,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "app-ready": "~0.1.0",
     "cors": "~2.8.5",
     "express": "^4.14.1",
     "express-longpoll": "~0.0.6",
+    "handle-quit": "~2.0.0",
     "uuid": "~8.3.2"
   }
 }

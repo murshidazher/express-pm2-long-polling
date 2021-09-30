@@ -9,8 +9,8 @@ module.exports = {
       wait_ready: true,
       exec_mode: "cluster",
       instance_var: "APP_INSTANCE_SEQ",
-      listen_timeout: 5000,
-      kill_timeout: 5000,
+      listen_timeout: 10000,
+      kill_timeout: 10000,
       restart_delay: 10000,
       max_memory_restart: "1G",
     }
