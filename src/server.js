@@ -47,7 +47,7 @@ app.use(
 //     log.error(
 //       'The application is not in a ready state, the request cannot be handled',
 //     );
-//     throw new createError.ServiceUnavailable();
+//     next(createError.ServiceUnavailable());
 //   }
 // });
 
@@ -64,7 +64,7 @@ app.use(
 //     log.error(msg);
 
 //     // 503 Service Unavailable
-//     throw createError.ServiceUnavailable(msg);
+//     next(createError.ServiceUnavailable(msg));
 //   }
 
 //   // Beacon is live upon creation. Shutdown handlers are suspended
@@ -129,7 +129,11 @@ lightship.queueBlockingTask(
   }),
 );
 
-const server = app.listen(SERVER_PORT);
+const server = app.listen(SERVER_PORT, () => {
+  // All signals will be queued until after all blocking tasks are resolved.
+  // server is ready to accept connections.
+  lightship.signalReady();
+});
 
 lightship.registerShutdownHandler(async () => {
   // allow sufficient amount of time to allow all of the existing
@@ -143,6 +147,3 @@ lightship.registerShutdownHandler(async () => {
   // detect what is keeping node process alive
   whyIsNodeRunning();
 });
-
-// server is ready to accept connections.
-lightship.signalReady();
