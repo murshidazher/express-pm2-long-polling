@@ -12,5 +12,5 @@ A rolling update strategy demo
 ## loadtest
 
 ```sh
-> loadtest -n 1000 -c 100 http://localhost:8080/
+> loadtest -n 1000 -c 100 http://localhost:8090/
 ```
