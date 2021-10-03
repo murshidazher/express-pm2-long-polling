@@ -5,8 +5,8 @@ A rolling update strategy demo
 ## artillery
 
 ```sh
-> artillery quick -r 10 -d 60 http://localhost:8090/
-> artillery quick -r 10 -d 60 http://10.118.10.25:8090/
+> artillery quick -r 10 -d 60 -o report.json http://localhost:8090/
+> artillery quick -r 10 -d 60 -o report.json http://10.118.10.25:8090/
 ```
 
 ## loadtest
