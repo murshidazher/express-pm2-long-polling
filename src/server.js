@@ -19,8 +19,8 @@ const {
 const app = express();
 const lightship = createLightship();
 
-let total = 0;
-let runningTotal = 0;
+// let total = 0;
+// let runningTotal = 0;
 
 const log = bunyan.createLogger({
   name: 'express-pm2-long-polling',
@@ -35,25 +35,25 @@ app.use(
 );
 
 app.get('/', (req, res) => {
-  total += 1;
-  runningTotal += 1;
+  // total += 1;
+  // runningTotal += 1;
 
   // serve MAX_REQUEST_SERVE requests and shutdown
   // if (total === MAX_REQUEST_SERVE) {
   //   lightship.shutdown();
   // }
 
-  setTimeout(() => {
-    runningTotal -= 1;
+  // setTimeout(() => {
+  //   runningTotal -= 1;
 
-    if (runningTotal < 100) {
-      lightship.signalReady();
-      log.warn('SERVER_IS_READY - server is ready to requests.');
-    } else {
-      lightship.signalNotReady();
-      log.warn("SERVER_IS_NOT_READY - server isn't ready yet.");
-    }
-  }, REQ_TIMEOUT);
+  //   if (runningTotal < 100) {
+  //     lightship.signalReady();
+  //     log.warn('SERVER_IS_READY - server is ready to requests.');
+  //   } else {
+  //     lightship.signalNotReady();
+  //     log.warn("SERVER_IS_NOT_READY - server isn't ready yet.");
+  //   }
+  // }, REQ_TIMEOUT);
 
   log.info(`SERVER - 🚀 Serving on port ${SERVER_PORT}`);
 
