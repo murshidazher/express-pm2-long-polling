@@ -11,12 +11,13 @@
   "license": "ISC",
   "main": "src/server.js",
   "scripts": {
-    "start": "pm2 start pm2.config.js",
+    "start": "npx pm2 start pm2.config.js",
     "start:dev": "nodemon src/server.js",
-    "reload": "pm2 reload pm2.config.js",
-    "log": "pm2 log express-pm2-long-polling",
-    "monit": "pm2 monit express-pm2-long-polling",
-    "stop": "pm2 stop pm2.config.js",
+    "reload": "npx pm2 reload pm2.config.js",
+    "log": "npx pm2 log express-pm2-long-polling",
+    "monit": "npx pm2 monit express-pm2-long-polling",
+    "graceful": "npx pm2 startOrGracefulReload pm2.config.js",
+    "stop": "npx pm2 stop pm2.config.js",
     "build": "babel ./src --out-dir ./build",
     "lint": "yarn lint:eslint && yarn lint:prettier",
     "lint:eslint": "eslint \"**/*.*\"",
@@ -39,7 +40,7 @@
     "lightship": "~6.7.2",
     "nanoid": "~3.1.28",
     "on-finished": "~2.3.0",
-    "why-is-node-running": "~2.2.0"
+    "why-is-node-running": "~2.2.1"
   },
   "devDependencies": {
     "@babel/cli": "~7.15.7",

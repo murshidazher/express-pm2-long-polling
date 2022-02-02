@@ -1,32 +1,27 @@
 const express = require('express');
-const cors = require('cors');
-const { nanoid } = require('nanoid');
-const delay = require('delay');
 const { createLightship } = require('lightship');
-const createError = require('http-errors');
-const bunyan = require('bunyan');
-const whyIsNodeRunning = require('why-is-node-running');
-const addRequestId = require('express-request-id');
-const onFinished = require('on-finished');
+const cors = require('cors');
+const process = require('process');
 
-const {
-  SERVER_PORT,
-  MAX_REQUEST_SERVE,
-  VERSION,
-  REQ_TIMEOUT,
-} = require('./config');
+// Lightship will start a HTTP service on port 9000.
+// add graceful shutdown monitor
+const lightship = createLightship({
+  detectKubernetes: false,
+  shutdownHandlerTimeout: 20000,
+  shutdownDelay: 20000,
+  gracefulShutdownTimeout: 60000,
+  terminate: () => {
+    // detect what is keeping the node process still alive.
+    const whyIsNodeRunning = require('why-is-node-running');
+    whyIsNodeRunning();
+
+    // eslint-disable-next-line no-console
+    console.log(`api server is shutting down - ${new Date().toUTCString()}`);
+    process.exit(0);
+  },
+});
 
 const app = express();
-const lightship = createLightship();
-
-// let total = 0;
-// let runningTotal = 0;
-
-const log = bunyan.createLogger({
-  name: 'express-pm2-long-polling',
-  version: `${VERSION}`,
-  serializers: bunyan.stdSerializers,
-});
 
 app.use(
   cors({
@@ -34,62 +29,108 @@ app.use(
   }),
 );
 
-app.get('/', (req, res) => {
-  // total += 1;
-  // runningTotal += 1;
+// ------------------ Add Middlewares ---------------
 
-  // serve MAX_REQUEST_SERVE requests and shutdown
-  // if (total === MAX_REQUEST_SERVE) {
-  //   lightship.shutdown();
-  // }
+// check readiness
+app.use((req, res, next) => {
+  console.log(lightship.isServerShuttingDown(), lightship.isServerReady());
+  if (lightship.isServerShuttingDown()) {
+    console.error('The server is shutting down');
+    return res.status(503).send('service unavailable');
+  }
 
-  // setTimeout(() => {
-  //   runningTotal -= 1;
+  if (lightship.isServerReady()) {
+    console.log('request server ready');
+  }
+  if (process.env.NODE_ENV === 'development') {
+    console.log(
+      'The application is not ready, but the request will be handled in a development environment',
+    );
+  }
 
-  //   if (runningTotal < 100) {
-  //     lightship.signalReady();
-  //     log.warn('SERVER_IS_READY - server is ready to requests.');
-  //   } else {
-  //     lightship.signalNotReady();
-  //     log.warn("SERVER_IS_NOT_READY - server isn't ready yet.");
-  //   }
-  // }, REQ_TIMEOUT);
+  const beacon = lightship.createBeacon();
 
-  log.info(`SERVER - 🚀 Serving on port ${SERVER_PORT}`);
-
-  res.send({
-    uuid: `${req.id}`,
-    version: `${VERSION}`,
-    worker: `${process.pid}`,
-    status: 'up',
-  });
+  next();
+  beacon.die();
 });
 
-lightship.queueBlockingTask(
-  new Promise((resolve) => {
-    setTimeout(() => {
-      // Lightship service status will be `SERVER_IS_NOT_READY` until all promises
-      // submitted to `queueBlockingTask` are resolved.
-      resolve();
-    }, 1000);
-  }),
+// // add request id
+// app.use(addRequestId());
+
+// // gracefully complete the request
+// app.use((req, res, next) => {
+//     // Beacon is live upon creation. Shutdown handlers are suspended
+//     // until there are no live beacons
+//     const beacon = lightship.createBeacon({ requestId: req.id });
+
+//     try {
+//         next();
+//     } catch (e) {
+//         console.log('eeer', e);
+//     }
+//     // After all Beacons are killed, it is possible
+//     // to proceed with the shutdown routine
+//     beacon.die();
+
+//     console.log('request has been finished:', { id: req.id });
+// });
+
+// ------------------ End Middlewares ---------------
+app.get('/', (req, res) => {
+  res.send('ok');
+});
+
+function fibo(n) {
+  if (n < 2) return 1;
+  return fibo(n - 2) + fibo(n - 1);
+}
+
+app.get('/fib/:num', (req, res) => {
+  const { num } = req.params;
+
+  const fib = fibo(num);
+  console.log(`SERVER - 🍳 fibo666 ${num}`);
+  console.log(`served - 🤩 ${req.params.num} - ${fib}`);
+
+  res.status(200).send({ fib, processId: `id ${process.pid}` });
+});
+
+// Launch the app:
+const PORT = process.env.PORT || 8080;
+
+const server = app
+  .listen(PORT, () => {
+    console.log(`Listening on port ${PORT}`);
+
+    // Tell Kubernetes that we are now ready to process incoming HTTP requests:
+    lightship.signalReady();
+  })
+  .on('close', () => {
+    console.info('Received close event');
+    lightship.signalNotReady('server');
+  })
+  .on('error', () => {
+    console.log(`shutting down server`);
+    lightship.signalNotReady('server');
+    lightship.shutdown();
+  });
+
+lightship.registerShutdownHandler(
+  () =>
+    new Promise((resolve, reject) => {
+      console.log('Closing the server...');
+      lightship.shutdown();
+      server.close((error) => {
+        if (error) {
+          console.log(error.stack || error);
+          reject(error.message);
+        } else {
+          console.log('... successfully closed the server!');
+          resolve();
+        }
+      });
+    }),
 );
 
-const server = app.listen(SERVER_PORT, () => {
-  // All signals will be queued until after all blocking tasks are resolved.
-  // server is ready to accept connections.
-  lightship.signalReady();
-});
-
-lightship.registerShutdownHandler(async () => {
-  // allow sufficient amount of time to allow all of the existing
-  // HTTP requests to finish before terminating the service.
-  await delay(REQ_TIMEOUT);
-
-  server.close(() => {
-    log.warn('SERVER_IS_SHUTTING_DOWN - server is shut down.');
-  });
-
-  // detect what is keeping node process alive
-  whyIsNodeRunning();
-});
+// PORTS
+console.log(`server port: ${PORT}`);
