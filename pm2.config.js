@@ -2,11 +2,14 @@ module.exports = {
   apps: [
     {
       name: 'express-pm2-long-polling',
-      script: 'server.js',
+      // script: 'server.js',
+      script: 'npm',
+      args: 'start:dev',
       instances: 'max',
       wait_ready: true,
       exec_mode: 'cluster',
-      exp_backoff_restart_delay: 100,
+      automation: false,
+      exp_backoff_restart_delay: 10,
       shutdown_with_message: true,
       kill_timeout: 10000,
       listen_timeout: 10000,
